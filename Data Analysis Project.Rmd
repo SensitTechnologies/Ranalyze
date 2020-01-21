@@ -1,0 +1,51 @@
+---
+title: "Gas Sensor Analysis"
+author: "Adam Johnson"
+date: "10/21/2019"
+output: word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objective
+
+This is an auto-generated report of a gas sensor test.
+
+## Setup
+
+List all the files in the "Data" directory, then search them for CSV files.  
+```{r load_data, echo=FALSE}
+listing <- dir("data")
+
+## Search the directory for CSV files.
+test_data <- listing[grep(".csv",listing)]
+```
+
+
+Format the data according to our liking.
+```{r import_all_data, echo=FALSE}
+source("functions.R")
+
+test_set <- data_import()
+```
+
+Then generate figures.
+```{r generate_figures, echo=FALSE}
+generate_plots(1,test_set)
+generate_plots(2,test_set)
+generate_plots(3,test_set)
+generate_plots(4,test_set)
+generate_plots(5,test_set)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
