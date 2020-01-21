@@ -1,4 +1,9 @@
-# Ensures all needed libraries are loaded
+## functions included here are:
+# loadLibraries - ensures all needed libraries are loaded
+# dataRead - reads the data given a specific file name
+# deriv - takes first derivative
+# findTestDevices - finds all the csv files within the working directory
+
 loadLibraries <- function(){
   if (!require("chron",character.only = TRUE))
   {
@@ -7,7 +12,6 @@ loadLibraries <- function(){
   }
 }
 
-# Reads the data given a specific file name
 dataRead <- function(filename){
   data <- read.csv(file = filename,header = TRUE, sep = ',')
   
@@ -28,7 +32,6 @@ dataRead <- function(filename){
   return(data)
 }
 
-# Takes first derivative
 deriv <- function(x,y){
   if (length(x)==length(y)){
     index <- c(1:length(x)-1)
@@ -43,7 +46,6 @@ deriv <- function(x,y){
   }
 }
 
-# Finds all the csv files within the working directory.
 findTestDevices <- function(){
   listing = dir()
   devices <- c()
