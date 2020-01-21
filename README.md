@@ -17,3 +17,9 @@ To do anything useful, you'll need some CSV files.
 6. In the Console (bottom left), type *findTestDevices()*.
 7. In the Console (bottom left), type *analyzeTest()*.  Plots should be generated.
 8. In the Plots Window (bottom right), click the left and right arrows to navigate between the various generated plots.
+
+## Licensing
+This project is available under the MIT license, but it's so specific right now that it's likely to not be of much use for awhile except for our specific application.  But if you're learning how to use R, perhaps it could be useful.  Enjoy!
+
+## Contributing
+If you've got something valuable, feel free to submit a pull request.
