@@ -2,7 +2,7 @@
 # analyzeTest - calculatees average values of the plateaus for all test data within the folder
 # analyzeTest_v0_DEPRECIATED - calculatees average values of the plateaus for all test data within the folder
 
-analyzeTest <- function(tests){
+analyzeTest <- function(){
   data = readTestData()
   
   data_struct <-list()

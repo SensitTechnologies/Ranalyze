@@ -38,16 +38,20 @@ separateSweeps <- function(data){
   num = length(zeroJumps)
 
   sweepBounds <- c()
-  for(i in 1:num){
-    if (i == 1){
-      bounds <- c(1,zeroIndex[zeroJumps[i+1]])
-    } else if (i == num){
-      bounds <- c(zeroIndex[zeroJumps[i-1]+1],length(data$Setpoint))
-    } else {
-      bounds <- c(zeroIndex[zeroJumps[i-1]+1],zeroIndex[zeroJumps[i+1]])
+  if (num > 1){
+    for(i in 1:num){
+      if (i == 1){
+        bounds <- c(1,zeroIndex[zeroJumps[i+1]])
+      } else if (i == num){
+        bounds <- c(zeroIndex[zeroJumps[i-1]+1],length(data$Setpoint))
+      } else {
+        bounds <- c(zeroIndex[zeroJumps[i-1]+1],zeroIndex[zeroJumps[i+1]])
+      }
+      
+      sweepBounds = append(sweepBounds,bounds)
     }
-    
-    sweepBounds = append(sweepBounds,bounds)
+  } else {
+    sweepBounds <- c(1,length(data$Setpoint))
   }
   
   #separate tests
