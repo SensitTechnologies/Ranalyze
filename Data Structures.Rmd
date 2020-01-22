@@ -1,23 +1,39 @@
 ---
-title: "Data Structures"
+title: "Introduction to R"
 author: "Adam Johnson"
-date: "10/28/2019"
-output: word_document
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This is a cheat sheet for R, and contains lots of exerpts from [Advanced R](http://adv-r.had.co.nz/Data-structures.html).  Read this if you've been away from R for awhile and need a quick refresher.
+This is a getting started guide for R, which is a language commonly used for data analytics, and contains lots of exerpts from [Advanced R](http://adv-r.had.co.nz/Data-structures.html), as well as introductory material sourced from RStudio (especially their introductory videos).  Read this if you've been away from R for awhile and need a quick refresher, or if you're just starting out and need an introduction.
 
-## R Markdown
+## RStudio (the company and IDE)
 
-This works a lot like regular markdown, but can include code that can be run or included in reports. Code sections can include parameters, and these are some important ones:
+R is a language.  [RStudio](https://rstudio.com/) is a company which makes an IDE by the same name most commonly used with the R language.  There are three versions of the IDE:  a desktop program, a cloud-based version, and a "pro" cloud-based version.  They all work similarly.  If you open the RStudio IDE, you'll see four main windows:
+* Top left:  
+* Top right:  Environment
+* Bottom left:  Console
+* Bottom right:  Plots
 
-- echo:  include source code in report
-- eval:  run the code
-- include:  include output (like plots) in report
+## File types
+
+There are several types of R files.  The first is a *.R* file, which is just code in the R language.  You can organize the code into functions, create libraries and packages, etc., just as you'd expect.
+
+The second is a *.Rmd* file, which stands for *R Markdown*, which can contain sections of R code, and also sections of [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) text.  These files can be compiled, or *knit*, to generate a report, which is a document containing any combination of formatted text, R code, and output (such as plots) from R code.  Sections of R code in a Rmd file can include parameters which specify what happens when a report is generated.  These are some important ones:
+
+- echo:  include the source code in the generated report
+- eval:  run the code when the 
+- include:  include code output (like plots) in report
+
+The report generated from an R markdown file can be a PDF, Word document, or HTML file.  As you can imagine, this can be *really* handy for processing data, which can automatically be formatted into a report.  In the *INSERT NAME OF THE PART OF R STUDIO HERE*, click *Knit* to generate the report for this file, and you'll have a handy dandy getting started guide to read while you get oriented to the language and IDE.
+
+The third is a *Rpres* file, which stands for *R Presentation*.  Running an R Presentation file will generate a PowerPoint-like output which is shown in the *Presentation* tab which opens in the top-right portion of the RStudio IDE.
 
 ## Data Structures
 
