@@ -1,7 +1,7 @@
 ---
 title: "Gas Sensor Analysis"
 author: "Adam Johnson"
-date: "10/21/2019"
+date: '`r format(Sys.Date(), "%m/%d/%Y")`'
 output: word_document: default
 ---
 
