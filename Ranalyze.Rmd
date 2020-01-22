@@ -23,7 +23,6 @@ listing <- dir("data")
 test_data <- listing[grep(".csv",listing)]
 ```
 
-
 Format the data according to our liking.
 ```{r import_all_data, echo=FALSE}
 source("functions.R")
