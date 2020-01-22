@@ -17,17 +17,17 @@ This is a getting started guide for R, and contains concepts from articles I fou
 
 # R and RStudio
 
-R is a programming language commonly used for data analytics.  [RStudio](https://rstudio.com/) is a company which makes an IDE (also called RStudio) commonly used with the R language.  There are three versions of the IDE:  a desktop program, a cloud-based version, and a "pro" cloud-based version.  They all work similarly.  If you open the RStudio IDE (with the default layout), you'll see several windows arranged as follows:
+R is a programming language commonly used for data analytics.  [RStudio](https://rstudio.com/) is a company which makes an IDE (also called RStudio) commonly used with the R language.  If you open the RStudio IDE (with the default layout), you'll see several windows arranged as follows:
 
 * Upper Left
   * **Source**: .R, .Rmd, .Rpres, etc. files open here
     * *Source* executes a script file; makes functions available in the Console.
     * *Knit* compiles an R Markdown file.
 * Lower Left
-  * **Console**:  R interpreter with command line
-    * Working directory displayed at top.
+  * **Console**:  R interpreter with command line; Working directory shown at top
 * Upper Right
   * **Environment**: generated data structures
+    * *Broom* deletes existing sourced data.
   * **History**: past commands to run/copy
     * *To Console* pastes a command into the Console window.
     * *To Source* pastes a commmand into the Source window.
@@ -43,7 +43,7 @@ R is a programming language commonly used for data analytics.  [RStudio](https:/
   * **Viewer**: interactive data exploration
   * **Help**: extensive documentation (also in the Help menu)
 
-A weird shortcut:  Ctrl+Z = undo. Ctrl+Shift+Z = redo.
+A weird shortcut:  Ctrl+Z = undo; Ctrl+Shift+Z = redo.
 
 # File types
 
