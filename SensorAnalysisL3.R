@@ -30,34 +30,3 @@ analyzeTest <- function(){
 
   return(data_struct)
 }
-
-analyzeTest_v0_DEPRECIATED <- function(data,tests){
-  #data = readTestData()
-
-  data_struct <- list()
-
-  if (tests == 1){
-    for (i in 1:length(data)){
-      data_struct[[i]] <- findPlateau(data[[i]])
-      attr(data_struct[[i]],"device") <- devices[i]
-    }
-  } else {
-    for (i in 1:length(data)){
-      print(paste("processing",i))
-
-      test_struct <- separateSweeps(data[[i]])
-      for (j in 1:tests){
-        testInd = (i-1)*tests+j
-
-        #indicate progress
-        print(paste("test #",testInd))
-
-        data_struct[[testInd]] <- findPlateau(test_struct[[j]])
-        attr(data_struct[[testInd]],"device") <- paste("DUT ",i)
-        attr(data_struct[[testInd]],"test") <- paste("test ",j)
-      }
-    }
-  }
-
-  return(data_struct)
-}
