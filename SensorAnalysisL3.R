@@ -1,13 +1,14 @@
-## functions included here are:
-# analyzeTest - calculatees average values of the plateaus for all test data within the folder
-# analyzeTest_v0_DEPRECIATED - calculatees average values of the plateaus for all test data within the folder
+## High-level functions
 
+#' Calculate average values of the plateaus for all test data in the working directory.
 analyzeTest <- function(){
   data = readTestData()
 
-  data_struct <-list()
+  data_struct <- list()
 
-  if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) || (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE)){
+  if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
+      (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE))
+  {
     data = ref_process(data)
   }
 

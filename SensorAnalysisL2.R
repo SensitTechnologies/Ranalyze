@@ -1,9 +1,10 @@
-## functions included here are:
-# ref_process - processes data from sensors with a reference that needs to be subtracted
-# findPlateau - finds average sensor value in each plateau automatically
-# separateSweeps - seperates out the different sweeps that if more than one sensor sweep was ran
-# readTestData - reads all of the test data within the folder
+## Mid-level functions
 
+#' Process data from differential sensors (where a reference reading needs to be
+#' subtracted from a sense reading).
+#' 
+#' @param data - output from 
+#' @return ???
 ref_process <- function(data){
   testIndex <- c()
   for (j in 1:length(data)){
@@ -53,6 +54,7 @@ ref_process <- function(data){
   return(processed_struct)
 }
 
+#' Find average sensor value in each plateau automatically.
 findPlateau <- function(data,device,test){
 
   plateau_index <- c(which(data[[1]]$dSet != 0,arr.ind=TRUE),length(data[[1]]$dSet))
@@ -79,6 +81,7 @@ findPlateau <- function(data,device,test){
   return(plateauAvg)
 }
 
+#' Separate multiple sensor sweeps.
 separateSweeps <- function(data){
   zeroIndex = which(data$Setpoint == 0,arr.ind=TRUE)
   zeroJumps = which(diff(zeroIndex) != 1,arr.ind=TRUE)
@@ -112,6 +115,7 @@ separateSweeps <- function(data){
   return(data_struct)
 }
 
+# Read all of the test data within the folder.
 readTestData <- function(){
   devices <- findTestDevices()
 
