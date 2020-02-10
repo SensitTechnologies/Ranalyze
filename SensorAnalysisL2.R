@@ -55,7 +55,7 @@ ref_process <- function(data){
 }
 
 #' Find average sensor value in each plateau automatically.
-findPlateau <- function(data,device,test){
+findPlateau <- function(data, device, test){
 
   plateau_index <- c(which(data[[1]]$dSet != 0,arr.ind=TRUE),length(data[[1]]$dSet))
   if (plateau_index[1] != 1){
@@ -72,6 +72,7 @@ findPlateau <- function(data,device,test){
     avg = mean(plateau)
     plateauAvg = append(plateauAvg,avg)
   }
+  
   plot(plateaus,main=paste("DUT",device," Test #",test))
 
   for (i in 1:length(plateauAvg)){

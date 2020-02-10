@@ -6,14 +6,15 @@ analyzeTest <- function(){
 
   data_struct <- list()
 
+  # If the data has "ref" and "sense" files, process as differential sensors.
   if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
-      (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE))
-  {
+      (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE)){
     data = ref_process(data)
   }
 
   for (i in 1:length(data)){
     print(paste("processing #",i))
+	
     test_struct <- separateSweeps(data[[i]])
 
     device_struct <- list()
