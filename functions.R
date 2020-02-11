@@ -38,19 +38,20 @@ generate_time_series <- function(data_set,param1,param2){
   grid(nx=NULL,ny=NULL)
 }
 
-take_deriv <- function(x_vals,y_vals){
-  deriv<-seq_along(x_vals)
-  deriv<-lapply(deriv,function(x){
-    if (x==0){
+take_deriv <- function(x,y){
+  deriv<-seq_along(x)
+  deriv<-lapply(deriv, function(i){
+    if (i == 0){
       return(c(0))
     } else {
-      curr_deriv<-c((y_vals[x]-y_vals[x-1])/(x_vals[x]-x_vals[x-1]))
+      curr_deriv <- c((y[i]-y[i-1])/
+					  (x[i]-x[i-1]))
       
       return(curr_deriv)
     }
   })
   
-  plot(x_vals,deriv,xlim=c(0,max(x_vals)))
+  plot(x,deriv,xlim=c(0,max(x)))
   
   return (unlist(deriv))
 }
