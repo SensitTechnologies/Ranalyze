@@ -1,14 +1,21 @@
 ## Lowest-level functions for CSV file analysis.
 
+#' Check if a library is loaded; install it if necessary.
+CheckLibrary <- function(libraryName){
+  # If the package is not installed...
+  if (!require(libraryName, character.only = TRUE)){
+    # Install it and any dependencies.
+    install.packages(libraryName, dep = TRUE)
+  }
+}
+
 #' Ensure all needed libraries are loaded.
 loadLibraries <- function(){
   # Load the chron package.
-  # If it is not installed...
-  if (!require("chron", character.only = TRUE))
-  {
-    # Install chron package and any dependencies.
-    install.packages("chron", dep=TRUE)
-  }
+  CheckLibrary("chron")
+  
+  # Load the colorspace package (for plotting in color).
+  CheckLibrary("colorspace")
 }
 
 #' Read the data given a specific file name.
@@ -20,14 +27,17 @@ loadLibraries <- function(){
 #' SensorValue - dependent variable, a number
 #' 
 #' @param filename - file of interest.
-#' @return data from the file.
+#' @return structure of data from the file.
 dataRead <- function(filename){
+  print(paste("Processing ", filename, "..."))
+  
   # Open the specified file and read it as a CSV.
   # BTW, read.csv2 is used if the separator is ';' instead of ','.
   # Not sure if header = TRUE and sep = ',' are necessary.
   data <- read.csv(file = filename, header = TRUE, sep = ',')
 
   # Parse the timestamp data into a vector.
+  print("  Parsing Elapsed Time...")
   elapsedTime <- times(data[[1]])
   
   # Convert timestamp from hh:mm:ss into seconds.
@@ -37,6 +47,8 @@ dataRead <- function(filename){
   # (If the maximum difference between timestamps is more than 60 seconds...)
   if (max(diff(elapsedSeconds)) > 60)
   {
+    print("  Found a delay.  Removing it...")
+    
     # Find the index in the elapsedSeconds vector after the max difference occurs.
     index = match(max(diff(elapsedSeconds)), diff(elapsedSeconds)) + 1
     
@@ -52,6 +64,8 @@ dataRead <- function(filename){
   if ((grepl("ref", tolower(filename)) == TRUE) ||
       (grepl("sense", tolower(filename)) == TRUE))
   {
+    print("  Found Ref/Sense data...")
+    
     # Split the filename (wherever there is a space) into a list of words
     file_split = strsplit(filename," ")
 
@@ -70,13 +84,8 @@ dataRead <- function(filename){
 
   # Calculate the derivative of the Setpoint with respect to elapsedSeconds.
   # Add that to data.
-  data$dSet = deriv(data$elapsedSeconds,data$Setpoint)
-
-  # Generate a scatterplot of SensorValue vs elapsedSeconds.
-  plot(data$elapsedSeconds, data$SensorValue,
-       main = paste(filename, "Output vs. Time"),
-       xlab = "Elapsed Time [s]",
-       ylab = "Sensor Output [V]")
+  print("  Calculating setpoint derivative...")
+  data$derivSetpoint = deriv(data$elapsedSeconds,data$Setpoint)
 
   return(data)
 }
@@ -94,10 +103,10 @@ deriv <- function(x,y){
     index <- c(1:length(x)-1)
     
     # Calculate the derivative at each element of the vectors.
-    deriv <- sapply(index, function(x1){
+    deriv <- sapply(index, function(i){
       calc =
-        (y[x1+1]-y[x1])/
-        (x[x1+1]-x[x1])
+        (y[i+1]-y[i])/
+        (x[i+1]-x[i])
         
       return(calc[1])
     })
@@ -108,7 +117,7 @@ deriv <- function(x,y){
   else
   {
     # Alert the user of an error.
-    print("Not the same length arrays")
+    print("Error:  Arrays of unequal length")
   }
 }
 
@@ -116,6 +125,8 @@ deriv <- function(x,y){
 #' 
 #' @return atomic vector with all csv filenames in the working directory
 findTestDevices <- function(){
+  print("Searching for CSV files...")
+  
   # List all the files in the working directory.
   listing = dir()
   
@@ -130,6 +141,9 @@ findTestDevices <- function(){
     {
       # Add it to our vector of devices.
       devices = append(devices,listing[i])
+      
+      # Alert the user.
+      print(paste("  ", listing[i]))
     }
   }
   
