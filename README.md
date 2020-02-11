@@ -3,7 +3,7 @@ R code to analyze data in CSV files.
 
 This project was created to analyze data collected via [Sensit Test Suite](https://github.com/SensitTechnologies/TestSuite).  This data exists in multiple comma-separated-value (CSV) files.  It's also a good introduction to the R language, since it was created by folks who were themselves new to R and its capabilities.
 
-There is also an R-markdown file (Data Structures.Rmd), which is useful as a refresher of how R works, in case you've been away for awhile.
+There is also an R-markdown file (Introduction-to-R.Rmd), which is useful as a refresher of how R works, in case you've been away for awhile.
 
 ## Prerequisites
 Install [R Studio](https://rstudio.com/), and clone this repository.
