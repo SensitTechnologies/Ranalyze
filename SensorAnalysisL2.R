@@ -57,9 +57,9 @@ ref_process <- function(data){
 #' Find average sensor value in each plateau automatically.
 findPlateau <- function(data, device, test){
 
-  plateau_index <- c(which(data[[1]]$dSet != 0,arr.ind=TRUE),length(data[[1]]$dSet))
+  plateau_index <- c(which(data[[1]]$derivSetpoint != 0,arr.ind=TRUE),length(data[[1]]$derivSetpoint))
   if (plateau_index[1] != 1){
-    plateau_index <- c(1,which(data[[1]]$dSet != 0,arr.ind=TRUE),length(data[[1]]$dSet))
+    plateau_index <- c(1,which(data[[1]]$derivSetpoint != 0,arr.ind=TRUE),length(data[[1]]$derivSetpoint))
   }
 
   plateauAvg <- c()
@@ -72,12 +72,14 @@ findPlateau <- function(data, device, test){
     avg = mean(plateau)
     plateauAvg = append(plateauAvg,avg)
   }
-  
-  plot(plateaus,main=paste("DUT",device," Test #",test))
 
-  for (i in 1:length(plateauAvg)){
-    abline(h=plateauAvg[i])
-  }
+  # Plot the plateaus.  
+# plot(plateaus,main=paste("DUT",device," Test #",test))
+
+  # Add straight lines to the plot.
+# for (i in 1:length(plateauAvg)){
+#   abline(h=plateauAvg[i])
+# }
 
   return(plateauAvg)
 }
@@ -118,15 +120,21 @@ separateSweeps <- function(data){
 
 # Read all of the test data within the folder.
 readTestData <- function(){
+  # Find all the csv files within the working directory.
   devices <- findTestDevices()
 
+  # Create an empty structure.
   data_struct <- list()
 
+  # For each file...
   for (i in 1:length(devices)){
+    # Read the data from the file.
     data_struct[[i]] <- dataRead(devices[i])
-    attr(data_struct[[i]],"filename") <- devices[i]
+    
+    # Add the filename as an attribute to the data.
+    name <- unlist(strsplit(devices[i], "\\."))
+    attr(data_struct[[i]],"filename") <- name[1]
   }
 
   return(data_struct)
-
 }
