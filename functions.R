@@ -1,9 +1,7 @@
+# Pull in data list from current working directory
+## You must set the working directory to where your data is stored
+## You can have other files in the folder.  This will only look for .csv files
 data_import <- function(){
-  
-  # Pull in data list from current working directory
-  ## You must set the working directory to where your data is stored
-  ## You can have other files in the folder.  This will only look for .csv files
-  
   ## List all the files in the working directory.
   listing <- dir()
   
@@ -80,44 +78,62 @@ average_plateaus <- function(data_set,plateaus){
     points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
     return(mean(data_set[["Reference"]][points]))
   })
-  acceptable<-lapply(unique(data_set[["Setpoint"]]),function(x){
-    points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
-    return(0.1*mean(data_set[["SensorValue"]][points]))
-  })
-  error<-lapply(unique(data_set[["Setpoint"]]),function(x){
-    points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
-    return((mean(data_set[["SensorValue"]][points])-x))
-  })
   
   output <- list()
   output["gases"]<-list(unlist(gases))
   output["averages"]<-list(unlist(averages))
   output["sd"]<-list(unlist(sd))
-  output["acceptable"]<-list(unlist(acceptable))
-  output["error"]<-list(unlist(error))
   
   return(output)
 }
 
-generate_plots <- function(device,test_set){
+generate_plots <- function(device,dut_name,test_set){
   deriv<-take_deriv(test_set[[device]]["data"][[1]]["adj_time"][[1]],test_set[[device]]["data"][[1]]["SensorValue"][[1]])
   
   plateaus<-find_plateaus(test_set[[device]]["data"][[1]]["adj_time"][[1]],deriv,2)
   
   output<-average_plateaus(test_set[[device]]["data"][[1]],plateaus)
   
-  print(output)
-  
   # plot overview of data
-  plot(test_set[[device]]["data"][[1]]["adj_time"][[1]],test_set[[device]]["data"][[1]]["SensorValue"][[1]])
+  png(paste(dut_name," Survey of Data.png"))
+  
+  plot(test_set[[device]]["data"][[1]]["adj_time"][[1]],test_set[[device]]["data"][[1]]["SensorValue"][[1]],'l',xlab="Time [s]",ylab="Signal [V]",main=paste("Survey of ",dut_name," Data"))
+  grid(nx=NULL,ny=NULL)
+  
+  dev.off()
   
   # general standard deviation plot
-  plot(output$gases,output$averages,lwd=2,pch=5,xlab="Gas [vol%]",ylab="Signal [V]")
+  png(paste(dut_name," Average and STD.png"))
+  plot(output$gases,output$averages,lwd=2,pch=5,xlab="Gas [vol%]",ylab="Signal [V]",xlim=c(-1,27),main=paste("Overview of ",dut_name," Plateau Averages with Standard Deviation"))
   
   arrows(output$gases,output$averages-2*output$sd,output$gases,output$averages+2*output$sd,length=0.05,angle=90,code=3,col="blue",lwd=2)
+  with(output,text(output$gases,output$averages,paste("avg=",round(output$averages,2),"V\n std=",round(output$sd,6)),pos=4,cex=0.75,adj=0))
+  grid(nx=NULL,ny=NULL)
+  
+  dev.off()
   
   # plot lm plot
-  plot(output$averages,output$gases,lwd=2,pch=5,xlab="Signal [V]",ylab="Gases [vol.%]")
+  png(paste(dut_name," Overview of Calibration.png"))
+  plot(output$averages,output$gases,lwd=2,pch=5,xlab="Signal [V]",ylab="Gases [vol.%]",ylim=c(-0.7,27),main=paste("Overview of ",dut_name," Calibration"))
   fit<-lm(gases ~ averages,data=output)
-  abline(fit)
+  abline(fit,col="red")
+  
+  s<-summary(fit)
+  lgd_str<-paste("(intercept) estimate=",round(coef(s)[1],2),"| Std.Err=",round(coef(s)[3],2),"| Pr(>|t|)=",round(coef(s)[7],2),"\n Signal[V] estimate=",round(coef(s)[2],2),"| Std.Err=",round(coef(s)[4],2),"| Pr(>|t|)=",round(coef(s)[8],2),"\n r^2=",round(s$r.squared,2))
+  legend('topleft',bty='n',legend=lgd_str)
+  
+  
+  predicted = predict(fit,output)
+  output$predicted <- list(unlist(predicted))
+  errors <- lapply(seq_along(output$predicted[[1]]),function(x){
+    err = round((output$predicted[[1]][x] - output$gases[x])/output$predicted[[1]][x]*100,2)
+    return (err)
+  })
+  output$errors<-unlist(errors)
+  
+  with(output,text(output$averages,output$gases,paste("err=",output$errors,"%"),pos=1,cex=0.75,adj=0))
+  grid(nx=NULL,ny=NULL)
+  
+  dev.off()
+  
 }
