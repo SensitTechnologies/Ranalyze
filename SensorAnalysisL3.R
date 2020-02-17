@@ -1,7 +1,92 @@
 ## High-level functions
 
+#' Plot sensor value vs. gas concentration.
+#' @param data 
+PlotConcentrationVsOutput <- function(){
+  devices <- vector(mode = "list", length = length(dataAveraged))
+  #tests <- vector(mode = "list", length = length(dataAveraged))
+  rangeX <- 0
+  rangeY <- 0
+  for (i in 1:length(dataAveraged)){
+    # Add an empty list to the series.
+    devices[[i]] <- list()
+    # tests[[i]] <- list()
+    
+    for (j in 1:length(dataAveraged[[i]])){
+      # Find the names of each data series.
+      attr(devices[[i]],"name") <- attr(dataAveraged[[i]][[j]],"device")
+      #attr(tests[[i]], "name") <- attr(dataAveraged[[i]][[j]], "test")
+      
+      # Find how big the x-axis needs to be.
+      if (max(dataAveraged[[i]][[j]]$SensorValue) > rangeX){
+        rangeX <- max(dataAveraged[[i]][[j]]$SensorValue)
+      }
+      
+      # Find how big the y-axis needs to be.
+      if (max(dataAveraged[[i]][[j]]$Reference) > rangeY){
+        rangeY <- max(dataAveraged[[i]][[j]]$Reference)
+      }
+    }
+  }
+  
+  # Aggregate all the sensor output and gas concentration values.
+  for (i in 1:length(dataAveraged)){
+    for (j in 1:length(dataAveraged[[i]])){
+      # Sort the data by device:
+      for (k in 1:length(devices)){
+        if (grepl(attr(devices[[k]],"name"), attr(dataAveraged[[i]][[j]],"device"), fixed = TRUE)){
+          devices[[k]]$gasConcentration = append(devices[[k]]$gasConcentration, dataAveraged[[i]][[j]]$Reference)
+          devices[[k]]$output = append(devices[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
+        }
+      }
+      
+      # Also sort the data by sweep:
+      # for (m in 1:length(tests)){
+      #   if (grepl(attr(tests[[k]], "name"), attr(dataAveraged[[i]][[j]], "test"), fixed = TRUE)){
+      #     tests[[k]]$gasConcentration = append(tests[[k]]$gasConcentration, dataAveraged[[i]][[j]]$Reference)
+      #     tests[[k]]$output = append(tests[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
+      #   }
+      # }
+    }
+  }
+  
+  # Make a vector of the device names (used for the plot's legend).
+  seriesNames <- c()
+  for (i in 1:length(devices)){
+    # Find the names of each data series.
+    seriesNames <- append(seriesNames, attr(devices[[i]],"name"))
+  }
+  
+  # Make the y-axis 10% larger to fit the legend.
+  rangeY <- rangeY * 1.25
+  
+  # Create the plot (with no data).
+  plot(NULL, main = "Concentration vs. Output (by Device)",
+       xlim = c(0, rangeX),
+       ylim = c(0.0, rangeY),
+       xlab = "Signal [V]",
+       ylab = "Gas [vol%]")
+  
+  # Add a grid.
+  grid()
+  
+  # Create an array of colors to use for each set of data.
+  pal = rainbow(length(devices))
+  
+  # Plot Output vs. Concentration.
+  for (i in 1:length(devices)){
+    points(devices[[i]]$output, devices[[i]]$gasConcentration,
+           col = pal[i], lty = i)
+    lines(devices[[i]]$output, devices[[i]]$gasConcentration,
+           col = pal[i], lty = i)
+  }
+  
+  # Add a legend to the plot.
+  legend("top", seriesNames, fill = pal, horiz = TRUE)
+}
+
 #' Plot sensor value vs. elapsed time.
-PlotOutputVsTime <- function(data){
+PlotOutputVsTime <- function(){
   seriesNames <- c()
   rangeX <- 0
   rangeY <- 0
@@ -46,6 +131,30 @@ PlotOutputVsTime <- function(data){
   legend("top", seriesNames, fill = pal, horiz = TRUE)
 }
 
+FindPlateus <- function(){
+  # Create a structure of the plateau values at each test.
+  data_struct <- list()
+  for (i in 1:length(data)){
+    print(paste("processing DUT", i))
+    
+    # Create a struct of all the "tests" associated with a device.
+    test_struct <- separateSweeps(data[[i]])
+    
+    device_struct <- list()
+    for (j in 1:length(test_struct)){
+      print(paste("  test #",j))
+      
+      device_struct[[j]] = findPlateau(test_struct[j],i,j)
+      attr(device_struct[[j]],"device") <- paste("DUT ",i)
+      attr(device_struct[[j]],"test") <- paste("test ",j)
+    }
+    
+    data_struct[[i]] = device_struct
+  }
+  
+  return(data_struct)
+}
+
 #' Calculate average values of the plateaus for all test data in the working directory.
 analyzeTest <- function(){
   # Ensure required libraries are loaded.
@@ -61,27 +170,15 @@ analyzeTest <- function(){
   }
   
   # Plot output vs. time.
-  PlotOutputVsTime(data)
+  PlotOutputVsTime()
   
-  # Create a structure of the plateau values at each test.
-  data_struct <- list()
-  for (i in 1:length(data)){
-    print(paste("processing DUT",i))
-
-    test_struct <- separateSweeps(data[[i]])
-
-    device_struct <- list()
-
-    for (j in 1:length(test_struct)){
-      print(paste("  test #",j))
-
-      device_struct[[j]] = findPlateau(test_struct[j],i,j)
-      attr(device_struct[[j]],"device") <- paste("DUT ",i)
-      attr(device_struct[[j]],"test") <- paste("test ",j)
-    }
-
-    data_struct[[i]] = device_struct
-  }
-
-  return(data_struct)
+  # Calculate plateau values.
+  dataAveraged <- FindPlateus()
+  
+  # TODO:  Plot concentration vs. output for all sensors, sweeps in a single series.
+  PlotConcentrationVsOutput()
+  
+  # TODO:  Plot output vs. concentration of each sensor as a separate series.
+  
+  # TODO:  Plot output vs. concentration of each sweep as a separate series.
 }
