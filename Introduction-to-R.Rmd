@@ -43,7 +43,12 @@ R is a programming language commonly used for data analytics.  [RStudio](https:/
   * **Viewer**: interactive data exploration
   * **Help**: extensive documentation (also in the Help menu)
 
-A weird shortcut:  Ctrl+Z = undo; Ctrl+Shift+Z = redo.
+After opening RStudio, remember to:
+
+* Set the working directory.
+* Source the R scripts.
+* Load required libraries (perhaps you have a function to do this in your scripts?).
+* Use Ctrl+Z = undo; Ctrl+Shift+Z = redo.
 
 # File types
 
