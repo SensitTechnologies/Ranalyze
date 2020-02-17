@@ -18,6 +18,21 @@ loadLibraries <- function(){
   CheckLibrary("colorspace")
 }
 
+#' Remove contiguous duplicated elements in a vector.
+#' 
+#' Inspiration:  https://stackoverflow.com/questions/10769640/how-to-remove-repeated-elements-in-a-vector-similar-to-set-in-python
+#' @param vector - the data to parse
+#' @return vector, but without contiguous duplicated elements
+#' @examples
+#' v <- c(1, 1, 5, 5, 5, 5, 2, 2, 6, 6, 1, 3, 3)
+#' RemoveContiguousDuplicated(v)
+#' [1] 1 5 2 6 1 3
+RemoveContiguousDuplicated <- function(vector){
+  vector <- vector[c(TRUE, !vector[-length(vector)] == vector[-1])]
+  
+  return(vector)
+}
+
 #' Read the data given a specific file name.
 #' 
 #' This function expects a CSV file with these columns of data:
