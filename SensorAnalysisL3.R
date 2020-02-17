@@ -4,19 +4,16 @@
 #' @param data 
 PlotConcentrationVsOutput <- function(){
   devices <- vector(mode = "list", length = length(dataAveraged))
-  #tests <- vector(mode = "list", length = length(dataAveraged))
   rangeX <- 0
   rangeY <- 0
   for (i in 1:length(dataAveraged)){
     # Add an empty list to the series.
     devices[[i]] <- list()
-    # tests[[i]] <- list()
-    
+
     for (j in 1:length(dataAveraged[[i]])){
       # Find the names of each data series.
       attr(devices[[i]],"name") <- attr(dataAveraged[[i]][[j]],"device")
-      #attr(tests[[i]], "name") <- attr(dataAveraged[[i]][[j]], "test")
-      
+
       # Find how big the x-axis needs to be.
       if (max(dataAveraged[[i]][[j]]$SensorValue) > rangeX){
         rangeX <- max(dataAveraged[[i]][[j]]$SensorValue)
@@ -39,14 +36,6 @@ PlotConcentrationVsOutput <- function(){
           devices[[k]]$output = append(devices[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
         }
       }
-      
-      # Also sort the data by sweep:
-      # for (m in 1:length(tests)){
-      #   if (grepl(attr(tests[[k]], "name"), attr(dataAveraged[[i]][[j]], "test"), fixed = TRUE)){
-      #     tests[[k]]$gasConcentration = append(tests[[k]]$gasConcentration, dataAveraged[[i]][[j]]$Reference)
-      #     tests[[k]]$output = append(tests[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
-      #   }
-      # }
     }
   }
   
