@@ -62,24 +62,26 @@ findPlateau <- function(data, device, test){
     plateau_index <- c(1,which(data[[1]]$derivSetpoint != 0,arr.ind=TRUE),length(data[[1]]$derivSetpoint))
   }
 
-  plateauAvg <- c()
-  plateaus <- c()
+  plateauAvg <- list()
   for (i in 1:(length(plateau_index)-1)){
+    # Find the index in data where the plateau starts.
     start_plateau = plateau_index[i] + (plateau_index[i+1]-plateau_index[i])/2
-    plateau = data[[1]]$SensorValue[start_plateau:plateau_index[i+1]]
+    
+    # Parse out the plateau data.
+    sensorValue = data[[1]]$SensorValue[start_plateau:plateau_index[i]]
+    setpoint = data[[1]]$Setpoint[start_plateau:plateau_index[i]]
+    reference = data[[1]]$Reference[start_plateau:plateau_index[i]]
 
-    plateaus = append(plateaus,plateau)
-    avg = mean(plateau)
-    plateauAvg = append(plateauAvg,avg)
+    # Average the sensor values.
+    avgSensorValue = mean(sensorValue)
+    avgSetpoint = mean(setpoint)
+    avgReference = mean(reference)
+    
+    # Create a structure with the average sensor value, 
+    plateauAvg$SensorValue = append(plateauAvg$SensorValue, avgSensorValue)
+    plateauAvg$Setpoint = append(plateauAvg$Setpoint, avgSetpoint)
+    plateauAvg$Reference = append(plateauAvg$Reference, avgReference)
   }
-
-  # Plot the plateaus.  
-# plot(plateaus,main=paste("DUT",device," Test #",test))
-
-  # Add straight lines to the plot.
-# for (i in 1:length(plateauAvg)){
-#   abline(h=plateauAvg[i])
-# }
 
   return(plateauAvg)
 }
@@ -108,7 +110,7 @@ separateSweeps <- function(data){
     sweepBounds <- c(1,length(data$Setpoint))
   }
 
-  #separate tests
+  # Separate tests.
   data_struct <- list()
   for (i in 1:num){
     data_struct[[i]] <- data[sweepBounds[2*i-1]:sweepBounds[2*i],]
