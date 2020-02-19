@@ -51,7 +51,7 @@ take_deriv <- function(x,y){
     }
   })
   
-  plot(x,deriv,xlim=c(0,max(x)))
+  #plot(x,deriv,xlim=c(0,max(x)))
   
   return (unlist(deriv))
 }
@@ -67,14 +67,21 @@ find_plateaus <- function(x_vals,deriv,cf){
 }
 
 average_plateaus <- function(data_set,plateaus){
-  averages<-lapply(unique(data_set[["Setpoint"]]),function(x){
+  setpoints <- unique(data_set[["Setpoint"]])
+  
+  averages<-lapply(setpoints,function(x){
+    # Find the plateaus with setpoint == x.
     points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
+    
+    # Average those plateaus.
     return(mean(data_set[["SensorValue"]][points]))
   })
+  
   sd<-lapply(unique(data_set[["Setpoint"]]),function(x){
     points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
     return(sd(data_set[["SensorValue"]][points]))
   })
+  
   gases<-lapply(unique(data_set[["Setpoint"]]),function(x){
     points = intersect(plateaus,which(data_set[["Setpoint"]]==x))
     return(mean(data_set[["Reference"]][points]))
@@ -95,32 +102,68 @@ generate_plots <- function(device,dut_name,test_set){
   
   output<-average_plateaus(test_set[[device]]["data"][[1]],plateaus)
   
-  # plot overview of data
-  png(paste(dut_name," Survey of Data.png"))
+  # Plot output vs. time.
+  # (I commented out the lines that save the plot as a png file.)
+  #png(paste(dut_name," Survey of Data.png"))
   
   plot(test_set[[device]]["data"][[1]]["adj_time"][[1]],test_set[[device]]["data"][[1]]["SensorValue"][[1]],'l',xlab="Time [s]",ylab="Signal [V]",main=paste("Survey of ",dut_name," Data"))
   grid(nx=NULL,ny=NULL)
   
-  dev.off()
+  #dev.off()
   
   # general standard deviation plot
-  png(paste(dut_name," Average and STD.png"))
-  plot(output$gases,output$averages,lwd=2,pch=5,xlab="Gas [vol%]",ylab="Signal [V]",xlim=c(-1,27),main=paste("Overview of ",dut_name," Plateau Averages with Standard Deviation"))
+  # (I commented out the lines that save the plot as a png file.)
+  #png(paste(dut_name," Average and STD.png"))
+  plot(output$gases, output$averages,
+       lwd = 2, pch = 20,
+       xlab = "Gas [vol%]",
+       ylab="Signal [V]",
+       xlim=c(-1,27),
+       main = paste("Overview of ",dut_name," Plateau Averages with Standard Deviation"))
   
-  arrows(output$gases,output$averages-2*output$sd,output$gases,output$averages+2*output$sd,length=0.05,angle=90,code=3,col="blue",lwd=2)
-  with(output,text(output$gases,output$averages,paste("avg=",round(output$averages,2),"V\n std=",round(output$sd,6)),pos=4,cex=0.75,adj=0))
+  arrows(output$gases,
+         output$averages - 2*output$sd,
+         output$gases,
+         output$averages + 2*output$sd,
+         length = 0.05,# length of edges of arrow head 
+         angle = 90,   # angle from shaft of arrow to edge of arrowhead
+         code = 3,     # Draw arrowhead at both ends of line.
+         col = "blue", # Make the arrow blue.
+         lwd=2)
+  
+  with(output,
+       text(output$gases, output$averages,
+            paste("avg=", round(output$averages, 2),
+                  "V\n std=", round(output$sd, 6)),
+            pos = 4, cex = 0.75, adj = 0))
+  
   grid(nx=NULL,ny=NULL)
   
-  dev.off()
+  #dev.off()
   
   # plot lm plot
-  png(paste(dut_name," Overview of Calibration.png"))
-  plot(output$averages,output$gases,lwd=2,pch=5,xlab="Signal [V]",ylab="Gases [vol.%]",ylim=c(-0.7,27),main=paste("Overview of ",dut_name," Calibration"))
-  fit<-lm(gases ~ averages,data=output)
-  abline(fit,col="red")
+  # (I commented out the lines that save the plot as a png file.)
+  #png(paste(dut_name," Overview of Calibration.png"))
+  plot(output$averages, output$gases,
+       lwd = 2, pch = 20,
+       xlab = "Signal [V]",
+       ylab="Gases [vol.%]",
+       ylim=c(-0.7,27),
+       main=paste("Overview of ",dut_name," Calibration"))
+  
+  fit<-lm(gases ~ averages, data=output)
+  
+  abline(fit, col="red")
   
   s<-summary(fit)
-  lgd_str<-paste("(intercept) estimate=",round(coef(s)[1],2),"| Std.Err=",round(coef(s)[3],2),"| Pr(>|t|)=",round(coef(s)[7],2),"\n Signal[V] estimate=",round(coef(s)[2],2),"| Std.Err=",round(coef(s)[4],2),"| Pr(>|t|)=",round(coef(s)[8],2),"\n r^2=",round(s$r.squared,2))
+  lgd_str<-paste("(intercept) estimate=",round(coef(s)[1],2),
+                 "| Std.Err=",round(coef(s)[3],2),
+                 "| Pr(>|t|)=",round(coef(s)[7],2),
+                 "\n Signal[V] estimate=",round(coef(s)[2],2),
+                 "| Std.Err=",round(coef(s)[4],2),
+                 "| Pr(>|t|)=",round(coef(s)[8],2),
+                 "\n r^2=",round(s$r.squared,2))
+  
   legend('topleft',bty='n',legend=lgd_str)
   
   
@@ -135,6 +178,6 @@ generate_plots <- function(device,dut_name,test_set){
   with(output,text(output$averages,output$gases,paste("err=",output$errors,"%"),pos=1,cex=0.75,adj=0))
   grid(nx=NULL,ny=NULL)
   
-  dev.off()
+  #dev.off()
   
 }
