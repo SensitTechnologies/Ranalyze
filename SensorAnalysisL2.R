@@ -76,11 +76,13 @@ findPlateau <- function(data, device, test){
     avgSensorValue = mean(sensorValue)
     avgSetpoint = mean(setpoint)
     avgReference = mean(reference)
+    # stdDevSensorValue = sd(sensorValue)
     
     # Create a structure with the average sensor value, 
     plateauAvg$SensorValue = append(plateauAvg$SensorValue, avgSensorValue)
     plateauAvg$Setpoint = append(plateauAvg$Setpoint, avgSetpoint)
     plateauAvg$Reference = append(plateauAvg$Reference, avgReference)
+    # plateauAvg$StdDev = append(plateauAvg$StdDev, stdDevSensorValue)
   }
 
   return(plateauAvg)

@@ -1,8 +1,8 @@
 ## High-level functions
 
 #' Plot sensor value vs. gas concentration.
-#' @param data 
-PlotConcentrationVsOutput <- function(){
+#' @param dataAveraged - custom structure
+PlotConcentrationVsOutput <- function(dataAveraged){
   devices <- vector(mode = "list", length = length(dataAveraged))
   rangeX <- 0
   rangeY <- 0
@@ -34,6 +34,7 @@ PlotConcentrationVsOutput <- function(){
         if (grepl(attr(devices[[k]],"name"), attr(dataAveraged[[i]][[j]],"device"), fixed = TRUE)){
           devices[[k]]$gasConcentration = append(devices[[k]]$gasConcentration, dataAveraged[[i]][[j]]$Reference)
           devices[[k]]$output = append(devices[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
+          devices[[k]]$stdDev = append(devices[[k]]$stDev, dataAveraged[[i]][[j]]$StdDev)
         }
       }
     }
@@ -50,11 +51,11 @@ PlotConcentrationVsOutput <- function(){
   rangeY <- rangeY * 1.25
   
   # Create the plot (with no data).
-  plot(NULL, main = "Concentration vs. Output (by Device)",
+  plot(NULL, main = "Concentration vs. Output",
        xlim = c(0, rangeX),
        ylim = c(0.0, rangeY),
        xlab = "Signal [V]",
-       ylab = "Gas [vol%]")
+       ylab = "Gas [%V]")
   
   # Add a grid.
   grid()
@@ -63,19 +64,43 @@ PlotConcentrationVsOutput <- function(){
   pal = rainbow(length(devices))
   
   # Plot Output vs. Concentration.
+  equationString <- ""
   for (i in 1:length(devices)){
+    # Plotting the points.
     points(devices[[i]]$output, devices[[i]]$gasConcentration,
-           col = pal[i], lty = i)
-    lines(devices[[i]]$output, devices[[i]]$gasConcentration,
-           col = pal[i], lty = i)
+           col = pal[i], pch = 20)
+    
+    # Connect those points with lines (but probably comment this out if you're
+    # planning to plot best fit).
+    #lines(devices[[i]]$output, devices[[i]]$gasConcentration, col = pal[i])
+    
+    # Create a best-fit line and plot that.
+    fit <- lm(gasConcentration ~ output, data=devices[[i]])
+    abline(fit, col = pal[i])
+    
+    # Write fit summary string.
+    s<-summary(fit)
+    equationString <- append(equationString,
+                             paste(attr(devices[[i]],"name"),
+                                   ": y = ",
+                                   round(coef(s)[2], 2),
+                                   "x + ",
+                                   round(coef(s)[1], 2),
+                                   " r^2=",round(s$r.squared,2),
+                                   "\n"))
   }
+  
+  # Write the fit equations on the chart.
+  legend('bottomright',bty = 'n',legend = equationString, pt.cex = 1, cex = 0.75)
   
   # Add a legend to the plot.
   legend("top", seriesNames, fill = pal, horiz = TRUE)
+  
+  return (equationString)
 }
 
 #' Plot sensor value vs. elapsed time.
-PlotOutputVsTime <- function(){
+PlotOutputVsTime <- function(data){
   seriesNames <- c()
   rangeX <- 0
   rangeY <- 0
@@ -120,7 +145,7 @@ PlotOutputVsTime <- function(){
   legend("top", seriesNames, fill = pal, horiz = TRUE)
 }
 
-FindPlateus <- function(){
+FindPlateus <- function(data){
   # Create a structure of the plateau values at each test.
   data_struct <- list()
   for (i in 1:length(data)){
@@ -159,15 +184,11 @@ analyzeTest <- function(){
   }
   
   # Plot output vs. time.
-  PlotOutputVsTime()
+  PlotOutputVsTime(data)
   
   # Calculate plateau values.
-  dataAveraged <- FindPlateus()
+  dataAveraged <- FindPlateus(data)
   
-  # TODO:  Plot concentration vs. output for all sensors, sweeps in a single series.
-  PlotConcentrationVsOutput()
-  
-  # TODO:  Plot output vs. concentration of each sensor as a separate series.
-  
-  # TODO:  Plot output vs. concentration of each sweep as a separate series.
+  # Plot concentration vs. output for each sensor.
+  PlotConcentrationVsOutput(dataAveraged)
 }
