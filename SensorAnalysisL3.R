@@ -34,7 +34,6 @@ PlotConcentrationVsOutput <- function(dataAveraged){
         if (grepl(attr(devices[[k]],"name"), attr(dataAveraged[[i]][[j]],"device"), fixed = TRUE)){
           devices[[k]]$gasConcentration = append(devices[[k]]$gasConcentration, dataAveraged[[i]][[j]]$Reference)
           devices[[k]]$output = append(devices[[k]]$output, dataAveraged[[i]][[j]]$SensorValue)
-          devices[[k]]$stdDev = append(devices[[k]]$stDev, dataAveraged[[i]][[j]]$StdDev)
         }
       }
     }
@@ -65,14 +64,11 @@ PlotConcentrationVsOutput <- function(dataAveraged){
   
   # Plot Output vs. Concentration.
   equationString <- ""
+  coefficients <- list()
   for (i in 1:length(devices)){
     # Plotting the points.
     points(devices[[i]]$output, devices[[i]]$gasConcentration,
            col = pal[i], pch = 20)
-    
-    # Connect those points with lines (but probably comment this out if you're
-    # planning to plot best fit).
-    #lines(devices[[i]]$output, devices[[i]]$gasConcentration, col = pal[i])
     
     # Create a best-fit line and plot that.
     fit <- lm(gasConcentration ~ output, data=devices[[i]])
@@ -88,15 +84,26 @@ PlotConcentrationVsOutput <- function(dataAveraged){
                                    round(coef(s)[1], 2),
                                    " r^2=",round(s$r.squared,2),
                                    "\n"))
+    
+    # Calculate mean, std dev of the equations.
+    coefficients$slope = append(coefficients$slope, round(coef(s)[2], 2))
+    coefficients$intercept = append(coefficients$intercept, round(coef(s)[1], 2))
   }
   
-  # Write the fit equations on the chart.
+  # Finish calculating the mean of the coefficients for each device.
+  coefficients$meanSlope = mean(coefficients$slope)
+  coefficients$meanIntercept = mean(coefficients$intercept)
+  coefficients$stdDevSlope = sd(coefficients$slope)
+  coefficients$stdDevIntercept = sd(coefficients$intercept)
+  
+  # Write the fit equations on the chart (in smallish font).
   legend('bottomright',bty = 'n',legend = equationString, pt.cex = 1, cex = 0.75)
   
   # Add a legend to the plot.
   legend("top", seriesNames, fill = pal, horiz = TRUE)
   
-  return (equationString)
+  # Return the coefficients.
+  return (coefficients)
 }
 
 #' Plot sensor value vs. elapsed time.
@@ -159,7 +166,7 @@ FindPlateus <- function(data){
       print(paste("  test #",j))
       
       device_struct[[j]] = findPlateau(test_struct[j],i,j)
-      attr(device_struct[[j]],"device") <- paste("DUT ",i)
+      attr(device_struct[[j]],"device") <- attr(data[[i]],"filename")
       attr(device_struct[[j]],"test") <- paste("test ",j)
     }
     
