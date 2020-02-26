@@ -2,6 +2,8 @@
 
 #' Plot sensor value vs. gas concentration.
 #' @param dataAveraged - custom structure
+#' @return coefficients - custom structure with best-fit coefficients for each
+#' sensor
 PlotConcentrationVsOutput <- function(dataAveraged){
   devices <- vector(mode = "list", length = length(dataAveraged))
   rangeX <- 0
@@ -86,13 +88,15 @@ PlotConcentrationVsOutput <- function(dataAveraged){
                                    "\n"))
     
     # Calculate mean, std dev of the equations.
-    coefficients$slope = append(coefficients$slope, round(coef(s)[2], 2))
-    coefficients$intercept = append(coefficients$intercept, round(coef(s)[1], 2))
+    coefficients$slope = append(coefficients$slope, coef(s)[2])
+    coefficients$intercept = append(coefficients$intercept, coef(s)[1])
+    coefficients$interceptPr = append(coefficients$interceptPr, coef(s)[7])
   }
   
   # Finish calculating the mean of the coefficients for each device.
   coefficients$meanSlope = mean(coefficients$slope)
   coefficients$meanIntercept = mean(coefficients$intercept)
+  coefficients$meanInterceptPr = mean(coefficients$interceptPr)
   coefficients$stdDevSlope = sd(coefficients$slope)
   coefficients$stdDevIntercept = sd(coefficients$intercept)
   
