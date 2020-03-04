@@ -102,9 +102,9 @@ PlotConcentrationVsOutput <- function(dataAveraged){
   
   # Write the fit equations on the chart (in smallish font).
   legend('bottomright',bty = 'n',legend = equationString, pt.cex = 1, cex = 0.75)
-  
-  # Add a legend to the plot.
-  legend("top", seriesNames, fill = pal, horiz = TRUE)
+
+  # Add a legend to the plot (in smallish font).
+  legend("top", seriesNames, fill = pal, horiz = TRUE, pt.cex = 1, cex = 0.75)
   
   # Return the coefficients.
   return (coefficients)
@@ -152,22 +152,26 @@ PlotOutputVsTime <- function(data){
           col = pal[i], lty = i)
   }
   
-  # Add a legend to the plot.
-  legend("top", seriesNames, fill = pal, horiz = TRUE)
+  # Add a legend to the plot (in a smallish font).
+  legend("top", seriesNames, fill = pal, horiz = TRUE, pt.cex = 1, cex = 0.75)
 }
 
-FindPlateus <- function(data){
+FindPlateus <- function(data, printFlag = FALSE){
   # Create a structure of the plateau values at each test.
   data_struct <- list()
   for (i in 1:length(data)){
-    print(paste("processing DUT", i))
+    if (printFlag == TRUE){
+      print(paste("processing DUT", i))
+    }
     
     # Create a struct of all the "tests" associated with a device.
     test_struct <- separateSweeps(data[[i]])
     
     device_struct <- list()
     for (j in 1:length(test_struct)){
-      print(paste("  test #",j))
+      if (printFlag == TRUE){
+        print(paste("  test #",j))
+      }
       
       device_struct[[j]] = findPlateau(test_struct[j],i,j)
       attr(device_struct[[j]],"device") <- attr(data[[i]],"filename")
@@ -183,10 +187,10 @@ FindPlateus <- function(data){
 #' Calculate average values of the plateaus for all test data in the working directory.
 analyzeTest <- function(){
   # Ensure required libraries are loaded.
-  loadLibraries()
+  LoadLibraries()
   
   # Read all of the test data within the working folder.
-  data = readTestData()
+  data = readTestData(printFlag = TRUE)
 
   # If the data has "ref" and "sense" files, process as differential sensors.
   if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
@@ -201,5 +205,5 @@ analyzeTest <- function(){
   dataAveraged <- FindPlateus(data)
   
   # Plot concentration vs. output for each sensor.
-  PlotConcentrationVsOutput(dataAveraged)
+  coefficients = PlotConcentrationVsOutput(dataAveraged)
 }

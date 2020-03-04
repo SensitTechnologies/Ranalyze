@@ -9,15 +9,6 @@ CheckLibrary <- function(libraryName){
   }
 }
 
-#' Ensure all needed libraries are loaded.
-loadLibraries <- function(){
-  # Load the chron package.
-  CheckLibrary("chron")
-  
-  # Load the colorspace package (for plotting in color).
-  CheckLibrary("colorspace")
-}
-
 #' Remove contiguous duplicated elements in a vector.
 #' 
 #' Inspiration:  https://stackoverflow.com/questions/10769640/how-to-remove-repeated-elements-in-a-vector-similar-to-set-in-python
@@ -42,9 +33,13 @@ RemoveContiguousDuplicated <- function(vector){
 #' SensorValue - dependent variable, a number
 #' 
 #' @param filename - file of interest.
+#' @parem largeDelay - time delays greater than this will be parsed out
+#' @param printFlag - TRUE to print progress; false to omit
 #' @return structure of data from the file.
-dataRead <- function(filename){
-  print(paste("Processing ", filename, "..."))
+dataRead <- function(filename, largeDelay = 60, printFlag = FALSE){
+  if (printFlag == TRUE){
+    print(paste("Processing ", filename, "..."))
+  }
   
   # Open the specified file and read it as a CSV.
   # BTW, read.csv2 is used if the separator is ';' instead of ','.
@@ -52,34 +47,50 @@ dataRead <- function(filename){
   data <- read.csv(file = filename, header = TRUE, sep = ',')
 
   # Parse the timestamp data into a vector.
-  print("  Parsing Elapsed Time...")
+  if (printFlag == TRUE){
+    print("  Parsing Elapsed Time...")
+  }
   elapsedTime <- times(data[[1]])
   
   # Convert timestamp from hh:mm:ss into seconds.
   elapsedSeconds <- sapply(elapsedTime, function(x) hours(x)*60*60 + minutes(x)*60 + seconds(x))
 
-  # If there's a big delay in the middle of the data...
-  # (If the maximum difference between timestamps is more than 60 seconds...)
-  if (max(diff(elapsedSeconds)) > 60)
+  # The timestamps are of the form day.hour:min:second, so when they roll to
+  # 1.00:00:00 R interprets this the same as 1:00:00, so the elapsed seconds
+  # will sharply decrease.  In our tests, this happens when a test gets left on
+  # overnight.  This detects that and fixes the elapsed seconds data.
+  # (If the maximum difference between timestamps is more than largeDelay seconds...)
+  while (max(abs(diff(elapsedSeconds))) > largeDelay)
   {
-    print("  Found a delay.  Removing it...")
+    if (printFlag == TRUE){
+      print("  Found a timestamp rollover.  Removing it...")
+    }
     
-    # Find the index in the elapsedSeconds vector after the max difference occurs.
-    index = match(max(diff(elapsedSeconds)), diff(elapsedSeconds)) + 1
+    # Find the index in the elapsedSeconds vector after the biggest difference occurs.
+    index = match(max(abs(diff(elapsedSeconds))), abs(diff(elapsedSeconds))) + 1
     
-    # Remove the big delay.
-    # (For all elements in elapsedSeconds after the max difference occurs,
-    # subtract the max difference.)
-    elapsedSeconds[index:length(elapsedSeconds)] =
-      elapsedSeconds[index:length(elapsedSeconds)] - max(diff(elapsedSeconds))
+    # Remove the delay. If the delay is positive...
+    if (max(diff(elapsedSeconds)) > largeDelay){
+      # For all elements after the max difference occurs, subtract the difference.
+      elapsedSeconds[index:length(elapsedSeconds)] =
+        elapsedSeconds[index:length(elapsedSeconds)] - max(diff(elapsedSeconds)) + 1
+    }
+    # If the delay is negative...
+    else {
+      # For all elements after the min difference occurs, subtract the difference.
+      elapsedSeconds[index:length(elapsedSeconds)] =
+        elapsedSeconds[index:length(elapsedSeconds)] - min(diff(elapsedSeconds)) + 1
+    }
   }
 
   # If the file we're loading contains "ref" or "sense" (not case sensitive)
-  # in it's filename...
+  # in its filename...
   if ((grepl("ref", tolower(filename)) == TRUE) ||
       (grepl("sense", tolower(filename)) == TRUE))
   {
-    print("  Found Ref/Sense data...")
+    if (printFlag == TRUE){
+      print("  Found Ref/Sense data...")
+    }
     
     # Split the filename (wherever there is a space) into a list of words
     file_split = strsplit(filename," ")
@@ -99,7 +110,9 @@ dataRead <- function(filename){
 
   # Calculate the derivative of the Setpoint with respect to elapsedSeconds.
   # Add that to data.
-  print("  Calculating setpoint derivative...")
+  if (printFlag == TRUE){
+    print("  Calculating setpoint derivative...")
+  }
   data$derivSetpoint = deriv(data$elapsedSeconds,data$Setpoint)
 
   return(data)
@@ -138,9 +151,12 @@ deriv <- function(x,y){
 
 #' Find all the csv files within the working directory.
 #' 
+#' @param printFlag - TRUE to print progress; false to omit
 #' @return atomic vector with all csv filenames in the working directory
-findTestDevices <- function(){
-  print("Searching for CSV files...")
+findTestDevices <- function(printFlag = FALSE){
+  if (printFlag == TRUE){
+    print("Searching for CSV files...")
+  }
   
   # List all the files in the working directory.
   listing = dir()
@@ -158,7 +174,9 @@ findTestDevices <- function(){
       devices = append(devices,listing[i])
       
       # Alert the user.
-      print(paste("  ", listing[i]))
+      if (printFlag == TRUE){
+        print(paste("  ", listing[i]))
+      }
     }
   }
   

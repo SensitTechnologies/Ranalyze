@@ -1,5 +1,14 @@
 ## Mid-level functions
 
+#' Ensure all needed libraries are loaded.
+LoadLibraries <- function(){
+  # Load the chron package.
+  CheckLibrary("chron")
+  
+  # Load the colorspace package (for plotting in color).
+  CheckLibrary("colorspace")
+}
+
 #' Process data from differential sensors (where a reference reading needs to be
 #' subtracted from a sense reading).
 #' 
@@ -45,7 +54,8 @@ ref_process <- function(data){
       processed$SenseVal = Sense$SensorValue
       processed$RefVal = Ref$SensorValue
       processed$SensorValue = Sense$SensorValue - Ref$SensorValue
-      attr(processed,"type") <- "processed"
+      attr(processed,"type") <- "differential"
+      attr(processed, "filename") <- attr(processed, "device")
 
       processed_struct[[i]] <- processed
     }
@@ -76,13 +86,11 @@ findPlateau <- function(data, device, test){
     avgSensorValue = mean(sensorValue)
     avgSetpoint = mean(setpoint)
     avgReference = mean(reference)
-    # stdDevSensorValue = sd(sensorValue)
-    
+
     # Create a structure with the average sensor value, 
     plateauAvg$SensorValue = append(plateauAvg$SensorValue, avgSensorValue)
     plateauAvg$Setpoint = append(plateauAvg$Setpoint, avgSetpoint)
     plateauAvg$Reference = append(plateauAvg$Reference, avgReference)
-    # plateauAvg$StdDev = append(plateauAvg$StdDev, stdDevSensorValue)
   }
 
   return(plateauAvg)
@@ -96,6 +104,7 @@ separateSweeps <- function(data){
   num = length(zeroJumps)
 
   sweepBounds <- c()
+  data_struct <- list()
   if (num > 1){
     for(i in 1:num){
       if (i == 1){
@@ -108,24 +117,26 @@ separateSweeps <- function(data){
 
       sweepBounds = append(sweepBounds,bounds)
     }
+    
+    for (i in 1:num){
+      data_struct[[i]] <- data[sweepBounds[2*i-1]:sweepBounds[2*i],]
+      attr(data_struct[[i]],"test") <- paste("test ", i)
+    }
   } else {
     sweepBounds <- c(1,length(data$Setpoint))
-  }
-
-  # Separate tests.
-  data_struct <- list()
-  for (i in 1:num){
-    data_struct[[i]] <- data[sweepBounds[2*i-1]:sweepBounds[2*i],]
-    attr(data_struct[[i]],"test") <- paste("test ",i)
+    
+    data_struct[[1]] <- data[sweepBounds[1]:sweepBounds[2],]
+    attr(data_struct[[1]],"test") <- paste("test ", 1)
   }
 
   return(data_struct)
 }
 
-# Read all of the test data within the folder.
-readTestData <- function(){
+#' Read all of the test data within the folder.
+#' @param printFlag - TRUE to print progress; false to omit
+readTestData <- function(printFlag = FALSE){
   # Find all the csv files within the working directory.
-  devices <- findTestDevices()
+  devices <- findTestDevices(printFlag)
 
   # Create an empty structure.
   data_struct <- list()
@@ -133,7 +144,7 @@ readTestData <- function(){
   # For each file...
   for (i in 1:length(devices)){
     # Read the data from the file.
-    data_struct[[i]] <- dataRead(devices[i])
+    data_struct[[i]] <- dataRead(devices[i], printFlag = printFlag)
     
     # Add the filename as an attribute to the data.
     name <- unlist(strsplit(devices[i], "\\."))
