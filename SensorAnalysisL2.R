@@ -133,10 +133,10 @@ separateSweeps <- function(data){
 }
 
 #' Read all of the test data within the folder.
-#' @param printFlag - TRUE to print progress; false to omit
-readTestData <- function(printFlag = FALSE){
+#' @param print - TRUE to print progress; false to omit
+readTestData <- function(print = FALSE){
   # Find all the csv files within the working directory.
-  devices <- findTestDevices(printFlag)
+  devices <- findTestDevices(print)
 
   # Create an empty structure.
   data_struct <- list()
@@ -144,7 +144,7 @@ readTestData <- function(printFlag = FALSE){
   # For each file...
   for (i in 1:length(devices)){
     # Read the data from the file.
-    data_struct[[i]] <- dataRead(devices[i], printFlag = printFlag)
+    data_struct[[i]] <- dataRead(devices[i], printFlag = print)
     
     # Add the filename as an attribute to the data.
     name <- unlist(strsplit(devices[i], "\\."))
