@@ -48,12 +48,10 @@ PlotConcentrationVsOutput <- function(dataAveraged){
     seriesNames <- append(seriesNames, attr(devices[[i]],"name"))
   }
   
-  # Make the y-axis 10% larger to fit the legend.
-  rangeY <- rangeY * 1.25
-  
   # Create the plot (with no data).
+  # Make the x-axis 20% larger to fit the legend.
   plot(NULL, main = "Concentration vs. Output",
-       xlim = c(0, rangeX),
+       xlim = c(0, rangeX * 1.2),
        ylim = c(0.0, rangeY),
        xlab = "Signal [V]",
        ylab = "Gas [%V]")
@@ -73,11 +71,11 @@ PlotConcentrationVsOutput <- function(dataAveraged){
            col = pal[i], pch = 20)
     
     # Create a best-fit line and plot that.
-    fit <- lm(gasConcentration ~ output, data=devices[[i]])
-    abline(fit, col = pal[i])
+    linearFit <- lm(gasConcentration ~ output, data = devices[[i]])
+    abline(linearFit, col = pal[i])
     
     # Write fit summary string.
-    s<-summary(fit)
+    s<-summary(linearFit)
     equationString <- append(equationString,
                              paste(attr(devices[[i]],"name"),
                                    ": y = ",
@@ -86,6 +84,11 @@ PlotConcentrationVsOutput <- function(dataAveraged){
                                    round(coef(s)[1], 2),
                                    " r^2=",round(s$r.squared,2),
                                    "\n"))
+    
+    # Create a quadratic fit and plot that.
+    # output2 <- devices[[i]]$output^2
+    # quadraticFit <- lm(gasConcentration ~ output + output2, data = devices[[i]])
+    # abline(quadraticFit, col = pal[i])
     
     # Calculate mean, std dev of the equations.
     coefficients$slope = append(coefficients$slope, coef(s)[2])
@@ -101,10 +104,10 @@ PlotConcentrationVsOutput <- function(dataAveraged){
   coefficients$stdDevIntercept = sd(coefficients$intercept)
   
   # Write the fit equations on the chart (in smallish font).
-  legend('bottomright',bty = 'n',legend = equationString, pt.cex = 1, cex = 0.75)
+  #legend('bottomright',bty = 'n',legend = equationString, pt.cex = 1, cex = 0.75)
 
   # Add a legend to the plot (in smallish font).
-  legend("top", seriesNames, fill = pal, horiz = TRUE, pt.cex = 1, cex = 0.75)
+  legend("topright", seriesNames, fill = pal, pt.cex = 1, cex = 0.75)
   
   # Return the coefficients.
   return (coefficients)
@@ -130,13 +133,11 @@ PlotOutputVsTime <- function(data){
     }
   }
   
-  # Make the y-axis 10% larger to fit the legend.
-  rangeY <- rangeY * 1.1
-  
   # Create the plot (with no data).
+  # Make the x-axis 20% larger to fit the legend.
   plot(NULL, main = "Output vs. Time",
-       xlim = c(0, rangeX),
-       ylim = c(0.0, rangeY),
+       xlim = c(0, rangeX * 1.25),
+       ylim = c(0.2, rangeY),
        xlab = "Elapsed Time [s]",
        ylab = "Sensor Output [V]")
   
@@ -153,7 +154,7 @@ PlotOutputVsTime <- function(data){
   }
   
   # Add a legend to the plot (in a smallish font).
-  legend("top", seriesNames, fill = pal, horiz = TRUE, pt.cex = 1, cex = 0.75)
+  legend("topright", seriesNames, fill = pal, pt.cex = 1, cex = 0.75, ncol = 2)
 }
 
 FindPlateus <- function(data, printFlag = FALSE){
@@ -190,7 +191,7 @@ analyzeTest <- function(){
   LoadLibraries()
   
   # Read all of the test data within the working folder.
-  data = readTestData(printFlag = TRUE)
+  data = readTestData(print = TRUE)
 
   # If the data has "ref" and "sense" files, process as differential sensors.
   if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
