@@ -14,7 +14,7 @@ LoadLibraries <- function(){
 #' 
 #' @param data - output from 
 #' @return ???
-ref_process <- function(data){
+ProcessReference <- function(data){
   testIndex <- c()
   for (j in 1:length(data)){
     testIndex = append(testIndex,attr(data[[j]],"dnum"))
@@ -65,7 +65,7 @@ ref_process <- function(data){
 }
 
 #' Find average sensor value in each plateau automatically.
-findPlateau <- function(data, device, test){
+FindPlateau <- function(data, device, test){
 
   plateau_index <- c(which(data[[1]]$derivSetpoint != 0,arr.ind=TRUE),length(data[[1]]$derivSetpoint))
   if (plateau_index[1] != 1){
@@ -97,7 +97,7 @@ findPlateau <- function(data, device, test){
 }
 
 #' Separate multiple sensor sweeps.
-separateSweeps <- function(data){
+SeparateSweeps <- function(data){
   zeroIndex = which(data$Setpoint == 0,arr.ind=TRUE)
   zeroJumps = which(diff(zeroIndex) != 1,arr.ind=TRUE)
 
@@ -134,21 +134,27 @@ separateSweeps <- function(data){
 
 #' Read all of the test data within the folder.
 #' @param print - TRUE to print progress; false to omit
-readTestData <- function(print = FALSE){
+ReadTestData <- function(print = FALSE){
   # Find all the csv files within the working directory.
-  devices <- findTestDevices(print)
+  files <- FindCSVFiles(print)
 
   # Create an empty structure.
   data_struct <- list()
 
   # For each file...
-  for (i in 1:length(devices)){
+  for (i in 1:length(files)){
     # Read the data from the file.
-    data_struct[[i]] <- dataRead(devices[i], printFlag = print)
+    data_struct[[i]] <- ReadTestFile(files[i], printFlag = print)
     
     # Add the filename as an attribute to the data.
-    name <- unlist(strsplit(devices[i], "\\."))
-    attr(data_struct[[i]],"filename") <- name[1]
+    filename <- unlist(strsplit(files[i], "\\."))
+    attr(data_struct[[i]],"filename") <- filename[1]
+  }
+  
+  # If the data has "ref" and "sense" files, process as differential sensors.
+  if ((grepl("ref",tolower(attr(data_struct[[1]],"filename"))) == TRUE) ||
+      (grepl("sense",tolower(attr(data_struct[[1]],"filename"))) == TRUE)){
+    data_struct <- ProcessReference(data_struct)
   }
 
   return(data_struct)

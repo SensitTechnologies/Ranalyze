@@ -36,7 +36,7 @@ RemoveContiguousDuplicated <- function(vector){
 #' @parem largeDelay - time delays greater than this will be parsed out
 #' @param printFlag - TRUE to print progress; false to omit
 #' @return structure of data from the file.
-dataRead <- function(filename, largeDelay = 60, printFlag = FALSE){
+ReadTestFile <- function(filename, largeDelay = 60, printFlag = FALSE){
   if (printFlag == TRUE){
     print(paste("Processing ", filename, "..."))
   }
@@ -113,7 +113,7 @@ dataRead <- function(filename, largeDelay = 60, printFlag = FALSE){
   if (printFlag == TRUE){
     print("  Calculating setpoint derivative...")
   }
-  data$derivSetpoint = deriv(data$elapsedSeconds,data$Setpoint)
+  data$derivSetpoint = Derive(data$elapsedSeconds,data$Setpoint)
 
   return(data)
 }
@@ -123,7 +123,7 @@ dataRead <- function(filename, largeDelay = 60, printFlag = FALSE){
 #' @param x - independent variable
 #' @parem y - dependent variable
 #' @return vector of the derivative
-deriv <- function(x,y){
+Derive <- function(x,y){
   # If x and y vectors have equal length...
   if (length(x)==length(y))
   {
@@ -153,7 +153,7 @@ deriv <- function(x,y){
 #' 
 #' @param printFlag - TRUE to print progress; false to omit
 #' @return atomic vector with all csv filenames in the working directory
-findTestDevices <- function(printFlag = FALSE){
+FindCSVFiles <- function(printFlag = FALSE){
   if (printFlag == TRUE){
     print("Searching for CSV files...")
   }

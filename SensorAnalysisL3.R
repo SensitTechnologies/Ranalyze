@@ -166,7 +166,7 @@ FindPlateus <- function(data, printFlag = FALSE){
     }
     
     # Create a struct of all the "tests" associated with a device.
-    test_struct <- separateSweeps(data[[i]])
+    test_struct <- SeparateSweeps(data[[i]])
     
     device_struct <- list()
     for (j in 1:length(test_struct)){
@@ -174,7 +174,7 @@ FindPlateus <- function(data, printFlag = FALSE){
         print(paste("  test #",j))
       }
       
-      device_struct[[j]] = findPlateau(test_struct[j],i,j)
+      device_struct[[j]] = FindPlateau(test_struct[j],i,j)
       attr(device_struct[[j]],"device") <- attr(data[[i]],"filename")
       attr(device_struct[[j]],"test") <- paste("test ",j)
     }
@@ -186,18 +186,12 @@ FindPlateus <- function(data, printFlag = FALSE){
 }
 
 #' Calculate average values of the plateaus for all test data in the working directory.
-analyzeTest <- function(){
+AnalyzeTest <- function(){
   # Ensure required libraries are loaded.
   LoadLibraries()
   
   # Read all of the test data within the working folder.
-  data = readTestData(print = TRUE)
-
-  # If the data has "ref" and "sense" files, process as differential sensors.
-  if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
-      (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE)){
-    data = ref_process(data)
-  }
+  data = ReadTestData(print = TRUE)
   
   # Plot output vs. time.
   PlotOutputVsTime(data)
