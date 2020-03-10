@@ -53,33 +53,33 @@ ReadTestFile <- function(filename, largeDelay = 60, printFlag = FALSE){
   elapsedTime <- times(data[[1]])
   
   # Convert timestamp from hh:mm:ss into seconds.
-  elapsedSeconds <- sapply(elapsedTime, function(x) hours(x)*60*60 + minutes(x)*60 + seconds(x))
+  ElapsedSeconds <- sapply(elapsedTime, function(x) hours(x)*60*60 + minutes(x)*60 + seconds(x))
 
   # The timestamps are of the form day.hour:min:second, so when they roll to
   # 1.00:00:00 R interprets this the same as 1:00:00, so the elapsed seconds
   # will sharply decrease.  In our tests, this happens when a test gets left on
   # overnight.  This detects that and fixes the elapsed seconds data.
   # (If the maximum difference between timestamps is more than largeDelay seconds...)
-  while (max(abs(diff(elapsedSeconds))) > largeDelay)
+  while (max(abs(diff(ElapsedSeconds))) > largeDelay)
   {
     if (printFlag == TRUE){
       print("  Found a timestamp rollover.  Removing it...")
     }
     
-    # Find the index in the elapsedSeconds vector after the biggest difference occurs.
-    index = match(max(abs(diff(elapsedSeconds))), abs(diff(elapsedSeconds))) + 1
+    # Find the index in the ElapsedSeconds vector after the biggest difference occurs.
+    index = match(max(abs(diff(ElapsedSeconds))), abs(diff(ElapsedSeconds))) + 1
     
     # Remove the delay. If the delay is positive...
-    if (max(diff(elapsedSeconds)) > largeDelay){
+    if (max(diff(ElapsedSeconds)) > largeDelay){
       # For all elements after the max difference occurs, subtract the difference.
-      elapsedSeconds[index:length(elapsedSeconds)] =
-        elapsedSeconds[index:length(elapsedSeconds)] - max(diff(elapsedSeconds)) + 1
+      ElapsedSeconds[index:length(ElapsedSeconds)] =
+        ElapsedSeconds[index:length(ElapsedSeconds)] - max(diff(ElapsedSeconds)) + 1
     }
     # If the delay is negative...
     else {
       # For all elements after the min difference occurs, subtract the difference.
-      elapsedSeconds[index:length(elapsedSeconds)] =
-        elapsedSeconds[index:length(elapsedSeconds)] - min(diff(elapsedSeconds)) + 1
+      ElapsedSeconds[index:length(ElapsedSeconds)] =
+        ElapsedSeconds[index:length(ElapsedSeconds)] - min(diff(ElapsedSeconds)) + 1
     }
   }
 
@@ -105,15 +105,15 @@ ReadTestFile <- function(filename, largeDelay = 60, printFlag = FALSE){
     attr(data,"dnum") <- substr(file_split[[1]][1],nchar(file_split[[1]][1]),nchar(file_split[[1]][1]))
   }
 
-  # Add elapsedSeconds to data.
-  data$elapsedSeconds = elapsedSeconds
+  # Add ElapsedSeconds to data.
+  data$ElapsedSeconds = ElapsedSeconds
 
-  # Calculate the derivative of the Setpoint with respect to elapsedSeconds.
+  # Calculate the derivative of the Setpoint with respect to ElapsedSeconds
   # Add that to data.
   if (printFlag == TRUE){
     print("  Calculating setpoint derivative...")
   }
-  data$derivSetpoint = Derive(data$elapsedSeconds,data$Setpoint)
+  data$derivSetpoint = Derive(data$ElapsedSeconds,data$Setpoint)
 
   return(data)
 }

@@ -118,18 +118,18 @@ PlotOutputVsTime <- function(data){
   seriesNames <- c()
   maxX <- 0
   minX <- 0
-  maxY <- 0
-  minY <- 0
+  maxY <- .Machine$double.xmin
+  minY <- .Machine$double.xmax
   for (i in 1:length(data)){
     # Find the names of each data series.
     seriesNames <- append(seriesNames, attr(data[[i]],"filename"))
     
     # Find the range of the x-axis.
-    if (max(data[[i]]$SensorValue) > maxX){
-      maxX <- max(data[[1]]$elapsedSeconds)
+    if (max(data[[i]]$ElapsedSeconds) > maxX){
+      maxX <- max(data[[i]]$ElapsedSeconds)
     }
-    if (min(data[[i]]$SensorValue) < minX){
-      minX <- min(data[[i]]$SensorValue)
+    if (min(data[[i]]$ElapsedSeconds) < minX){
+      minX <- min(data[[i]]$ElapsedSeconds)
     }
     
     # Find the range of the y-axis.
@@ -157,7 +157,7 @@ PlotOutputVsTime <- function(data){
   
   # For each set of data, generate a plot of SensorValue vs elapsedSeconds.
   for (i in 1:length(data)){
-    lines(data[[i]]$elapsedSeconds, data[[i]]$SensorValue,
+    lines(data[[i]]$ElapsedSeconds, data[[i]]$SensorValue,
           col = pal[i], lty = i)
   }
   
@@ -165,7 +165,7 @@ PlotOutputVsTime <- function(data){
   legend("topright", seriesNames, fill = pal, pt.cex = 1, cex = 0.75, ncol = 2)
 }
 
-FindPlateus <- function(data, printFlag = FALSE){
+FindPlateaus <- function(data, printFlag = FALSE){
   # Create a structure of the plateau values at each test.
   data_struct <- list()
   for (i in 1:length(data)){
@@ -201,11 +201,17 @@ AnalyzeTest <- function(){
   # Read all of the test data within the working folder.
   data = ReadTestData(print = TRUE)
   
+  # If the data has "ref" and "sense" files, process as differential sensors.
+  if ((grepl("ref",tolower(attr(data[[1]],"filename"))) == TRUE) ||
+      (grepl("sense",tolower(attr(data[[1]],"filename"))) == TRUE)){
+    data <- ProcessReference(data)
+  }
+  
   # Plot output vs. time.
   PlotOutputVsTime(data)
   
   # Calculate plateau values.
-  dataAveraged <- FindPlateus(data)
+  dataAveraged <- FindPlateaus(data)
   
   # Plot concentration vs. output for each sensor.
   coefficients = PlotConcentrationVsOutput(dataAveraged)

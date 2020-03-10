@@ -150,12 +150,6 @@ ReadTestData <- function(print = FALSE){
     filename <- unlist(strsplit(files[i], "\\."))
     attr(data_struct[[i]],"filename") <- filename[1]
   }
-  
-  # If the data has "ref" and "sense" files, process as differential sensors.
-  if ((grepl("ref",tolower(attr(data_struct[[1]],"filename"))) == TRUE) ||
-      (grepl("sense",tolower(attr(data_struct[[1]],"filename"))) == TRUE)){
-    data_struct <- ProcessReference(data_struct)
-  }
 
   return(data_struct)
 }
