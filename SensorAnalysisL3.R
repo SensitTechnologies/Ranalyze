@@ -116,28 +116,36 @@ PlotConcentrationVsOutput <- function(dataAveraged){
 #' Plot sensor value vs. elapsed time.
 PlotOutputVsTime <- function(data){
   seriesNames <- c()
-  rangeX <- 0
-  rangeY <- 0
+  maxX <- 0
+  minX <- 0
+  maxY <- 0
+  minY <- 0
   for (i in 1:length(data)){
     # Find the names of each data series.
     seriesNames <- append(seriesNames, attr(data[[i]],"filename"))
     
-    # Find how big the x-axis needs to be.
-    if (max(data[[i]]$SensorValue) > rangeX){
-      rangeX <- max(data[[1]]$elapsedSeconds)
+    # Find the range of the x-axis.
+    if (max(data[[i]]$SensorValue) > maxX){
+      maxX <- max(data[[1]]$elapsedSeconds)
+    }
+    if (min(data[[i]]$SensorValue) < minX){
+      minX <- min(data[[i]]$SensorValue)
     }
     
-    # Find how big the y-axis needs to be.
-    if (max(data[[i]]$SensorValue) > rangeY){
-      rangeY <- max(data[[i]]$SensorValue)
+    # Find the range of the y-axis.
+    if (max(data[[i]]$SensorValue) > maxY){
+      maxY <- max(data[[i]]$SensorValue)
+    }
+    if (min(data[[i]]$SensorValue) < minY){
+      minY <- min(data[[i]]$SensorValue)
     }
   }
   
   # Create the plot (with no data).
   # Make the x-axis 20% larger to fit the legend.
   plot(NULL, main = "Output vs. Time",
-       xlim = c(0, rangeX * 1.25),
-       ylim = c(0.2, rangeY),
+       xlim = c(minX, maxX * 1.25),
+       ylim = c(minY, maxY),
        xlab = "Elapsed Time [s]",
        ylab = "Sensor Output [V]")
   
